@@ -1,0 +1,428 @@
+/*======================Copyright (c) 2011, Roborobo===========================
+Project Name : 2012 Pro
+MCU Type : ATmega64A
+Date : 2013. 07. 13
+By : 김현수
+Support E-mail : mecharusa@roborobo.co.kr
+Support OS : WindowsXP, WindowsVista, Windows7
+Program Version : AVR Stuido 4.18 (Build 692) , WinAvr20100110 이상
+Web Site : www.roborobo.co.kr
+
+프로그램 버전을 지켜주시기 바랍니다.
+윈도우 XP, 윈도우 VISTA, 윈도우 7 호환 가능 합니다.
+Black Line ProR 전용 프로그램입니다.
+항상 매뉴얼을 참조하여 프로그램해 주세요.
+==============================================================================*/
+
+#include <pro/proBase.h>
+
+
+#define spA 19
+#define spB 7
+#define time_A 45
+
+
+//#define fff9   driver(20,20,19,17,15,13,10,8); //line 고속 absh값
+#define fff0   driver(20,19,17,15,13,10,8,6); tracemode(ff); setmotor(1);//line 고속 absh값
+#define fff1   driver(20,18,15,13,10,8,6,5); tracemode(ff); setmotor(1);//line 고속 absh값
+#define fff2   driver(18,16,14,12,9,7,5,4); tracemode(ff); setmotor(1);  //line 저속 absh값#define fff3   absh(13,10,5,2,1);    //잡으러 갈 때 absh값
+#define fff3   driver(16,10,8,6,5,4,3,1); tracemode(ff); setmotor(1);  //line 저속 absh값#define fff3   absh(13,10,5,2,1);    //잡으러 갈 때 absh값
+#define fff4   driver(14,13,11,9,7,6,4,3); tracemode(ff); setmotor(1);   //line 초저속 absh값
+#define fff5   driver(12,10,8,7,6,5,4,3); tracemode(ff); setmotor(1);
+#define fff6   driver(8,7,6,5,4,3,2,2); tracemode(ff); setmotor(1);
+#define fff7   driver(3,2,2,2,2,1,1,1); tracemode(ff); setmotor(1);
+
+#define df sensor(front);
+#define db sensor(rear);
+
+
+
+
+#define __ll  fff4;tracemode(ff);line(fl,14,0);motor(10,10,68);
+#define __rr  fff4;tracemode(ff);line(fr,14,0);motor(10,10,68);
+
+#define __lt fff4;exline(-7,7,s2,0);
+#define __rt fff4;exline(7,-7,s7,0);
+
+#define __lt_90 fff4;exturn(-7,7,s1,0);exturn(-7,7,s4,0);
+#define __rt_90 fff4;exturn(7,-7,s8,0);exturn(7,-7,s5,0);
+
+
+
+void lturn(unsigned char left, unsigned char right)
+{
+   setmotor(3);
+   while(RSENS8)
+   {wheel(left,right);} //11,3
+   while(!RSENS8)
+   {wheel(left,right);} //11,3
+   if(!FSENS1)
+      while(!FSENS1)
+      {wheel(left,right);} //11,3
+   		delay(10);
+   wheel(0,0);
+}
+
+void rturn(unsigned char left, unsigned char right)
+{
+   setmotor(3);
+   while(RSENS1)
+   {wheel(left,right);} //11,3
+   while(!RSENS1)
+   {wheel(left,right);} //11,3
+   if(!FSENS8)
+      while(!FSENS8)
+      {wheel(left,right);} //11,3
+	  delay(15);
+
+   wheel(0,0);
+}
+
+
+#define _lld fff6;line(sl1,8,0);motor(10,10,300);
+#define _rrd fff6;line(sr1,8,0);motor(10,10,300);
+
+#define _llld fff6;line(sl1,8,0);linedelay(10,250,0);
+#define _rrld fff6;line(sr1,8,0);linedelay(10,250,0);
+
+
+
+
+
+#define turnl lturn(0,13);
+#define turnr rturn(13,0);
+
+
+
+void array(void)
+{
+   fff5;
+   while(!FSENS2||!FSENS3||!FSENS4||!FSENS5||!FSENS6||!FSENS7)
+   {motor(-10,-10,2);}
+   while(FSENS2||FSENS3||FSENS4||FSENS5||FSENS6||FSENS7)
+   {
+      if(!FSENS2) motor(-15,5,2);
+      else if(!FSENS6) motor(5,-15,2);
+      else motor(10,10,2);
+   }//motor(10,10,350);
+}
+
+void r_array(void)
+{
+	//일부러 sensor(rear); 안붙임
+   fff5;
+   while(!RSENS2||!RSENS3||!RSENS4||!RSENS5||!RSENS6||!RSENS7)
+   {motor(-10,-10,2);}
+   while(RSENS2||RSENS3||RSENS4||RSENS5||RSENS6||RSENS7)
+   {
+      if(!FSENS2) motor(-15,5,2);
+      else if(!RSENS6) motor(5,-15,2);
+      else motor(10,10,2);
+   }
+}
+
+void barray(void)
+{
+   fff5;
+   while(!FSENS2||!FSENS3||!FSENS4||!FSENS5||!FSENS6||!FSENS7)
+   {motor(10,10,2);}
+   while(FSENS2||FSENS3||FSENS4||FSENS5||FSENS6||FSENS7)
+   {
+      if(!FSENS2) motor(15,-5,2);
+      else if(!FSENS6) motor(-5,15,2);
+      else motor(-10,-10,2);
+   }//motor(10,10,350);
+}
+
+
+#define closes delay(100);servo1(35);servo2(11);delay(100);
+#define open delay(100);servo1(-3);servo2(58);delay(100); 
+#define close delay(100);servo1(29);servo2(15);delay(100);
+#define down delay(100);servo3(18);delay(100);
+#define up delay(200);servo3(50);delay(300);
+#define fup servo3(100);
+#define fdown servo3(24);
+#define openl servo2(15);servo1(-3);
+#define openr servo1(29);servo2(58);
+#define sopen servo1(11);servo2(39);delay(100);
+#define  fclose2 servo1(18);servo2(94);
+#define fclose servo1(28);servo2(82);
+#define fopen servo1(84);servo2(24);
+#define gl servo1(84);delay(200);servo2(97);
+#define gr servo2(24);delay(200);servo1(8);
+
+void _servo12(double ss1,double ss2,double se1,double se2, double time)
+{
+   double unit = 50; // 서보 값마다의 시간 간격(ms)
+   double number = time/unit;   
+   int i;
+   double angle1, angle2;
+   angle1 = (se1-ss1)/number;
+   angle2 = (se2-ss2)/number;
+   for (i=0;i<=number;i++)
+   
+      servo1(ss1+i*angle1);
+      servo2(ss2+i*angle2);
+      delay(unit);
+   }
+
+
+void _servo3(double ss3,double se3, double time)
+{
+   double unit = 50; // 서보 값마다의 시간 간격(ms)
+   double number = time/unit;   
+   int i;
+   double angle3;
+   angle3 = (se3-ss3)/number;
+   for (i=0;i<=number;i++)
+   {
+      servo3(ss3+i*angle3);
+      delay(unit);
+   }
+}
+
+
+#define servo_tests open;delay(1000);close;delay(1000);up;delay(1000);down;delay(1000);open;delay(1000);closes;delay(1000);up;delay(1000);down;delay(1000);
+
+#define __ll1 fff3;tracemode(ff);line(fl1,10,0);
+
+#define __rr1 fff3;tracemode(ff);line(fr1,10,0);
+
+#define pll_fr1 fff3;tracemode(ll);line(fr1,10,0);fff3;tracemode(ll);linedelay(10,100,0);
+
+#define prr_fl1 fff3;tracemode(rr);line(fl1,10,0);fff3;tracemode(rr);linedelay(10,100,0);
+
+#define d1 delay(1000);
+
+int main(void)
+{
+//여기 아래는 설정함수 입니다
+
+   //startservo(0,0,0,0,0,0,0,0);   // 초기 로봇의 서보 각도 설정(올림피아드)
+   start(1);            // 초기 로봇의 동작 선언(1: 디버그 부저 사용, 0: 사용 안함)
+   crosstime(100);   
+      // 크로스 감지 시간 설정
+   motorbrake(BRAKE);      // 모터의 브레이크 모드 선택(Break는 급 정지, STOP은 관정 정지)
+   linecolor(BLACK);      // 라인 색 선택(BLACK: 라인이 검정색일때, WHITE는 라인이 흰색일때)
+   sensor(FRONT);         // 앞쪽 센서 또는 뒤쪽 센서 선택(FRONT: 센서를 전방 센서를 이용하여 라인트레이싱, REAR: 센서를 후방 센서를 이용하여 라인트레이싱)
+   error(0, 3000);         // 센서값이 정해진 검출 시간 동안 센서가 같은 값을 입력 받으면 에러 동작(1: 에러함수 동작, 0: 에러함수 사용안함)(에러함수 검출 시간 설정)
+   ffspeed(0,1);         // 양쪽 모터 직진성을 위해 전진 방향 속도 튜닝(왼쪽 모터 전방, 오른쪽 모터 전방)
+   bbspeed(0,0);         // 양쪽 모터 직진성을 위해 후진 방향 속도 튜닝(왼쪽 모터 후방, 오른쪽 모터 후방)
+   savetime(1);         // 함수의 동작 시간을 확인 할 수 있음(0: 세이브타임 설정 안함, 1: 누적 타임 설정, 2: 상대 시간 설정)
+   servotoq(1);          // 서보 모터의 토크(힘) 조절 1 ~ 5까지 조절 되며 숫자가 커질 수록 토크가 강해짐 (미니 서보 모터는 1로만 사용 가능)
+   eservotoq(1);         // 외장 서보 모터 인터페이스의 토크(힘) 조절 1 ~ 5까지 조절 되며 숫자가 커질 수록 토크가 강해짐 (미니 서보 모터는 1로만 사용 가능)
+
+   setmotor(1);         // 모터종류에 따라 테이블 설정 변경(1: 일반 모터, 2: 고성능 모터)
+   driver(20,18,15,13,10,8,6,5);      // 로봇의 직진성 설정(일반 드라이버 설정)
+   tdriver(20,18,15,13,10,8,6,5);      // left right 함수 사용시 드라이버값 적용
+	
+// 흰색(안닿) 1, 검은색(닿을때) 
+void centerlinedelay(char speed, int time)
+{
+    int elapsed = 0;
+    setmotor(1);       // Ensure motor is configured
+    sensor(FRONT);     // Use front sensors
+
+    while (elapsed < time)
+    {
+        if (!FSENS4 && FSENS5)
+        {
+            // FSENS4 sees white, FSENS5 sees black: steer left
+            motor(speed - 5, speed + 5, 0);
+        }
+        else if (FSENS4 && !FSENS5)
+        {
+            // FSENS5 sees white, FSENS4 sees black: steer right
+            motor(speed + 5, speed - 5, 0);
+        }
+        else if (!FSENS4 && !FSENS5)
+        {
+            // Both off line: maybe lost track, go backward or stop
+            motor(-speed, -speed, 0);
+        }
+        else
+        {
+            // Both sensors on line: go straight
+            motor(speed, speed, 0);
+        }
+
+        delay(10);
+        elapsed += 10;
+    }
+
+    motor(0, 0, 0);  // Stop after tracing
+}
+
+#define d1 delay(1000);
+#define _lld fff5; line(fl, 10, 0);
+void untilcenter(unsigned char speed)
+{
+    setmotor(1);           
+    while ( FSENS4 && FSENS5 )
+    {
+        wheel(speed, speed);
+    }
+    wheel(0, 0);
+}
+void openToCloseSlowly(double open_angle1, double open_angle2, double close_angle1, double close_angle2, double time)
+{
+    // Gradually move servo1 and servo2 from open position to close position
+    _servo12(open_angle1, open_angle2, close_angle1, close_angle2, time);
+}
+
+#define exturnf exturn(5, 5, s4, 0); array(); motor(5, 5, 200); 
+#define exturnfb exturn(5, 5, s4, 0); r_array(); motor(5, 5, 200); 
+#define exturnfc exturn(5, 5, s4, 0); motor(5, 5, 200);
+ffspeed(0, 0); bbspeed(0, 0);
+#define circlego __rr1; motor(10, 10, 200); __rt_90; down; open; d1; fff3; tracemode(ll); linedelay(10, 600, 0); _rrd; closes; d1; motor(10, 10, 150); __rt_90;
+#define circlegowo __rr1; motor(10, 10, 200); __rt_90; d1; fff3; tracemode(ll); linedelay(10, 600, 0); __rr1; motor(10, 10, 150); __rt_90;
+#define circleback __ll1; __lt_90; fff3; tracemode(rr); linedelay(10, 600, 0); __ll1; motor(10, 10, 150); __lt;
+
+//여기 아래서부터 동작 함수 프로그램 하세요
+/*
+up; close;
+//go for 7 (push 3)
+__rr; __rr; __rt; _lld; motor(10, 10, 300); motor(-10, -10, 300); __lt; //turn and curve
+circlego; __rr; __rt; __rr; motor(10, 10, 150);
+exturnf; exturnf; motor(10, -10, 90); up; open; d1; motor(-10, 10, 90); sensor(rear); exturnfb; exturnfb; sensor(front); close; d1; __lt; __lt; down; open; d1; __ll;
+
+//move 2 to ㅏ (2 lines above [first]
+linedelay(10, 150, 0); closes; d1; motor(-10, -10, 100); __lt;
+
+//curve back
+circleback;
+__rr; __rt; _rrd; motor(10, 10, 300); up; motor(-10, -10, 300);
+//go for 5
+__rt; up; open; d1; */ __ll; __lt; __rr1; motor(10, -10, 180); motor(10, 10, 50); next; 
+tracemode(rr); linedelay(10, 500, 0); delay(200); motor(10, -10, 60); down; d1; closes; d1; 
+__rt; next; tracemode(rr); linedelay(10, 400, 0); motor(10, 10, 180); __lt_90; __rr;
+//take 5 to zone 3
+__rt; __ll; __lt; __ll; __lt; 
+circlegowo; __rr; __rt; __rr;
+exturnf; exturnf; exturnf; up; open; delay(500); sensor(rear); exturnfb; exturnfb; exturnfb; sensor(front); close; d1; __lt; __lt; __ll; __lt;
+//5 and back
+circleback;
+__rr; __rr; __rt; up; open; d1;
+//go for 6
+__rr1; d1; __rt_90; d1; motor(10, 10, 200); delay(250); down; closes; d1; __rt; __ll1; motor(10, 10, 100); __lt; __ll;
+//6 to zone 2
+circlegowo; __rr; __rt; __rr; exturnf; exturnf; motor(-10, 10, 300); up; open; d1; motor(10, -10, 300); sensor(rear); exturnfb; exturnfb; sensor(front); close; d1; __lt; __lt;
+__ll; __lt; circleback;
+//go for 4
+up; open; d1; __rr; __rt; __rr; __rt; 
+__ll; __lt; __rr1; motor(10, 10, 100); __rt_90; fff3; tracemode(ll); linedelay(10, 500, 0); __ll; __lt; __rr; __rt;
+down; d1; motor(10, 10, 300); closes; d1; __lt; __ll; __lt;
+__rr1; __rt_90; fff3; tracemode(ff); linedelay(10, 500, 0); __ll; motor(10, -10, 150); motor(10, 10, 300); __lt; __rr; __rt;
+__ll; __lt; __ll; __lt; circlegowo; __rr; __rt; __rr;
+exturnf; exturnf; exturnf; up; open; d1; sensor(rear); exturnfb; exturnfb; exturnfb; sensor(front); close; d1; __lt; __lt; __ll; __lt;
+circleback; 
+//go for 2
+__rr; __rt; __rr; motor(10, 10, 300); down; closes; motor(-10, -10, 300); __rt; __ll; __lt; 
+__rr1; motor(10, 10, 100); __rt_90; fff3; tracemode(ll); linedelay(10, 500, 0); __rr; __rt; __ll; __lt; 
+__ll; __lt_90;; motor(10, 10, 400); delay(500); motor(10, -10, 400); 
+exturnfc; exturnfc; exturnfc; up; sensor(rear); exturnfc; exturnfc; exturnfc; sensor(front); __rt; __rr; __rt; __rr; __rt;
+__ll1; __lt_90; fff3; tracemode(ff); linedelay(10, 500, 0); __ll; motor(10, -10, 150); motor(10, 10, 300); __lt; __rr; __rt;
+//go for 3
+__ll; __lt; open; delay(200); __ll; motor(10, 10, 300); down; closes; motor(-10, -10, 300); __lt; __lt; __rr; __rt; __ll; __lt;
+__rr1; motor(10, 10, 100); __rt_90; fff3; tracemode(ll); linedelay(10, 500, 0); __rr; __rt; __ll; __lt;
+__ll; __lt_90;; motor(10, 10, 400); delay(500); motor(10, -10, 400); 
+exturnfc; exturnfc; exturnfc; up; sensor(rear); exturnfc; exturnfc; exturnfc; sensor(front); __rt; __rr; __rt; __rr; __rt;
+__ll1; __lt_90; fff3; tracemode(ff); linedelay(10, 500, 0); __ll; motor(10, -10, 150); motor(10, 10, 300); __lt; __rr; __rt; __ll; __lt; __lt;
+__ll; __lt; up; open;
+//go for 1
+__rr1; __rt_90; fff6; tracemode(rr); linedelay(10, 6000, 0); down; closes; delay(250); __lt; tracemode(ff); linedelay(10, 1000, 0); __ll1; motor(-10, 10, 150); motor(10, 10, 300);
+__lt; __rr; __rt; __ll; __lt; __lt; __ll; __lt;
+__rr1; motor(10, 10, 100); __rt_90; fff3; tracemode(ll); linedelay(10, 500, 0); __rr; __rt; __ll; __lt;
+__ll; __lt_90;; motor(10, 10, 400); delay(500); motor(10, -10, 400); 
+exturnfc; exturnfc; exturnfc; up; sensor(rear); exturnfc; exturnfc; exturnfc; sensor(front); __rt; __rr; __rt; __rr; __rt;
+
+/*
+//target 5
+__ll; __lt; up; close; d1; __rr1; down; closes;
+sensor(rear); __rr; __rt; __ll; sensor(front);
+__rt; __ll; __lt; __ll; __rt_90; fff6; tracemode(ll); linedelay(10, 2000, 0); __rr1; motor(6, 10, 200); __rt_90; __rr; __rt; __rr; 
+exturnf; exturnf; exturnf; open; up; d1;
+//go back after 5
+motor(-6, -10, 300); sensor(rear); exturnf; exturnf; exturnf; sensor(front); __rt; __rt; __ll; __lt; __ll1; __lt_90; 
+fff6; tracemode(ll); linedelay(10, 2000, 0); __ll1; motor(10, 500, 0); __lt; __lt; 
+__rr; __rt; __rr; __rt; 
+//start from -|
+__ll; __lt; __rr1; motor(6, 10, 100); __rt_90; down; open; d1;
+fff6; tracemode(rr); linedelay(5, 800, 0); __rr1; motor(10, 10, 100); __rt;
+__ll; __lt; __ll; close; motor(10, 10, 150); exturnf; motor(-10, 10, 180); up; d1; motor(10, 10, 800);
+//go back
+motor(-10, -10, 800); motor(10, -10, 120); sensor(rear); exturnf; sensor(front); motor(-10, -10, 200); __lt; __lt;
+__rr; __rt; __ll1; __lt_90; fff6; tracemode(ll);linedelay(10, 600, 0); __ll1; motor(6, 10, 200); __lt; __rr; __rt;
+//target 6
+__ll; __lt; up; __rr; __rt; up; open; _rrd; motor(6, 10, 50); __rt; _rrd; down; close; d1; sensor(rear); __rr; sensor(front); motor(-10, -10, 50); __rt;
+__ll; __ll; 
+__rt_90; fff6; tracemode(ll); linedelay(10, 2000, 0); __rr1; motor(10, 6, 200); __rt_90; __rr; __rt; __rr; 
+exturnf; exturnf; open; up; d1; close; d1;
+//go back after target 6
+motor(-10, -10, 300); sensor(rear); exturnf; exturnf; sensor(front); __rt; __rt; __ll; __lt; __ll1; __lt_90; 
+fff6; tracemode(ll); linedelay(10, 2000, 0); __ll1; motor(10, 500, 0); __lt; __lt; 
+//target 7
+__rr; __rr; __rt; __rr; __rt; __rr; __rt; motor(6, 10, 100); down; closes; d1; motor(-6, -10, 100); __rt; __ll; __lt; __rr; motor(6, 10, 200); __lt;
+__ll; __ll; __rt_90; fff6; tracemode(ll); linedelay(10, 2000, 0); __rr1; motor(6, 10, 200); __rt_90; __rr; __rt; __rr; 
+exturnf; exturnf; open; up; d1; close; d1;
+//go back after target 7
+motor(-6, -10, 300); sensor(rear); exturnf; exturnf; sensor(front); __rt; __rt; __ll; __lt; __ll1; __lt_90; 
+fff6; tracemode(ll); linedelay(10, 2000, 0); __ll1; motor(10, 500, 0); __lt; __lt; __rr; open; up;
+//target 4
+__rr; __rt; __rr; __rt; __ll; __lt; _rrd; down; close; d1; __rt; __rr; __rt; __rr; __rt; __rr; __rt; __ll; __lt; __ll;
+__rt_90; fff6; tracemode(ll); linedelay(10, 2000, 0); __rr1; motor(10, 10, 200); __rt_90; __rr; __rt; __rr; 
+exturnf; exturnf; exturnf; open; up; d1;
+//go back after 4
+motor(-6, -10, 300); sensor(rear); exturnf; exturnf; exturnf; sensor(front); __rt; __rt; __ll; __lt; __ll1; __lt_90; 
+fff6; tracemode(ll); linedelay(10, 2000, 0); __ll1; motor(10, 500, 0); __lt;
+//target 3
+motor(6, 10, 100); down; close; d1; motor(-6, -10, 100);
+__lt; __rr; __rt; __rr; __rt; __ll; __lt; __rr1; motor(6, 10, 100); __rt_90; down; open; d1;
+fff6; tracemode(rr); linedelay(5, 800, 0); __rr1; motor(6, 10, 100); __rt;
+__ll; __lt; __ll; close; motor(6, 10, 150); exturnf; motor(-6, 10, 180); up; d1; next; motor(6, 10, 800);
+//go back
+motor(-6, -10, 800); motor(6, -10, 120); sensor(rear); exturnf; sensor(front); motor(-6, -10, 200); __lt; __lt;
+__rr; __rt; __ll1; __lt_90; fff6; tracemode(ll);linedelay(10, 600, 0); __ll1; motor(6, 10, 200); __lt; __rr;
+//end
+__rt; __ll; __lt; __rr; __rt; __rr; __rr;
+*/
+
+
+
+
+
+
+
+/*
+//1
+motor(10,10,100);__ll;__lt;__rr1;motor(10,10,100);__rt_90;linedelay(10,580,0);__ll1;motor(10,10,100);__lt_90;__rr;__rt_90;motor(10,10,100);
+linedelay(10,1250,0);motor(10,10,50);__rt_90;linedelay(10,500,0);prr_fl1;sensor(rear);motor(10,10,100);sensor(front);__rt_90;linedelay(10,850,0);__ll1;__lt;motor(10,10,50);d1;motor(7,0,740);tracemode(rr);
+linedelay(10,900,0);__ll1;__lt_90;open;d1;down;d1;_rrd;closes;sensor(rear);__rr;d1;sensor(front);__rr;d1;sensor(rear);__rr;d1;sensor(front);__rr;d1;open;fff6;motor(10,10,2500);
+sensor(rear);motor(10,10,2500);sensor(front);up;closes;d1;__rt;__rt;__rr;__rt;
+
+//2
+linedelay(10,1000,0);__rr1;motor(10,10,260);d1;motor(0,7,770);__rt_90;linedelay(10,450,0);d1;__rt;pll_fr1;next;motor(10,10,100);__lt_90;tracemode(ll);linedelay(10,250,0);__rr1;motor(10,10,100);__rt_90;
+__ll1;motor(10,10,35);__lt_90;fff6;linedelay(10,460,0);motor(-10,10,250);open;d1;down;d1;closes;d1;motor(-10,-10,100);__lt_90;__ll1;__lt_90;linedelay(10,400,0);prr_fl1;motor(-10,-10,125);
+__rt_90;linedelay(10,740,0);
+__ll1;__lt;motor(10,10,25);d1;motor(7,0,740);tracemode(rr);linedelay(10,900,0);__ll1;__lt_90;__rr;d1;sensor(rear);__rr;d1;sensor(front);__rr;open;d1;fff6;motor(10,10,2500);motor(-10,-10,2500);
+up;closes;__rt;__rt;__rr1;__rt_90;
+
+//3
+linedelay(10,900,0);__rr1;motor(10,10,275);d1;motor(0,7,775);__rt_90;linedelay(10,450,0);d1;__rt;pll_fr1;d1;motor(-10,10,100);d1;
+__rt;__rr;__rt_90;__ll1;linedelay(10,250,0);motor(10,-10,150);open;down;d1;closes;d1;
+__rt;linedelay(10,400,0);__ll;__lt_90;__rr1;motor(10,10,160);__lt_90;tracemode(rr);linedelay(10,740,0);__ll1;__lt;motor(10,10,50);d1;motor(7,0,740);tracemode(rr);linedelay(10,900,0);
+__ll1;__lt_90;__rr;delay(500);sensor(rear);__rr;delay(500);sensor(front);__rr;delay(500);open;fff6;motor(10,10,2500);sensor(rear);motor(10,10,2500);up;closes;sensor(front);
+__lt;__lt;__rr;__rt_90;
+
+//4
+linedelay(10,900,0);__rr1;motor(10,10,260);d1;motor(0,7,780);__rt_90;linedelay(10,450,0);d1;__rt;pll_fr1;d1;__rt;__rr;__lt;down;d1;open;d1;__rr1;closes;sensor(rear);__rr;sensor(front);
+__rt;__rt;__ll1;linedelay(10,600,0);__rr1;motor(-7,7,300);next;fff6;motor(10,10,1400);up;
+*/
+
+next;
+end();
+
+	return 0;
+
+}
+
