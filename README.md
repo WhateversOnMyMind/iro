@@ -37,18 +37,10 @@ This repository contains code developed for the **International Robotics Olympia
 2. Flash the compiled binary to your Probot robot via the ISP interface.
 3. Ensure sensor calibration and servo alignment before use.
 4. Trigger specific challenge routines via `main()`'s behavior tree.
-
-## 🛠️ File Structure
-
 ```
 
-iro/
-├── main.c               # Core robot behavior script
-├── README.md            # This file
-└── \[proBase.h / pro.aps] # Required Roborobo headers and IDE project files
 
 ````
-
 > Note: You must have `proBase.h` and other dependencies from the Roborobo SDK.
 
 ## 🔧 Sample Macros
